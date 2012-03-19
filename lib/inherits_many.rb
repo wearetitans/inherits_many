@@ -2,24 +2,24 @@ require "inherits_many/version"
 
 class ActiveRecord::Base
 
-  @@passes_on_to = {}
-  def self.passes_on_to(target, params)
-    unless @@passes_on_to.has_key? self.name
-      @@passes_on_to[self.name] = []
+  @@transfers_to = {}
+  def self.transfers_to(target, params)
+    unless @@transfers_to.has_key? self.name
+      @@transfers_to[self.name] = []
     end
-    @@passes_on_to[self.name] << {target: target}.merge(params)
+    @@transfers_to[self.name] << {target: target}.merge(params)
   end
 
-  after_save :process_passes_on_to
-  def process_passes_on_to
+  after_save :process_transfers_to
+  def process_transfers_to
 
     concrete_class = self.class
 
     while concrete_class.name != 'ActiveRecord::Base' do
 
-      unless @@passes_on_to[concrete_class.name].nil?
+      unless @@transfers_to[concrete_class.name].nil?
 
-        @@passes_on_to[concrete_class.name].each do |tt|
+        @@transfers_to[concrete_class.name].each do |tt|
 
           child = tt[:target]
           parent = tt[:of]
@@ -60,63 +60,79 @@ class ActiveRecord::Base
   end
 
 
-  @@inherits_many = []
-  def self.inherits_many(source, params)
-    @@inherits_many << {source: source}.merge(params)
+  @@inherits = {}
+  def self.inherits(source, params)
+    unless @@inherits.has_key? self.name
+      @@inherits[self.name] = []
+    end
+    @@inherits[self.name] << {source: source}.merge(params)
   end
 
-  after_save :process_inherits_many
-  def process_inherits_many
+  after_save :process_inherits
+  def process_inherits
 
-    @@inherits_many.each do |tt|
+    concrete_class = self.class
 
-      child = tt[:source]
-      parent = tt[:from]
-      parent_id = "#{parent}_id"
+    while concrete_class.name != 'ActiveRecord::Base' do
 
-      # if the chain has changed ..
-      # if chain_id_changed?
-      if self.changes.has_key? parent_id
+      unless @@inherits[concrete_class.name].nil?
 
-        parent_id_was = self.changes[parent_id][0]
-        parent_id_is = self.changes[parent_id][1]
+        @@inherits[concrete_class.name].each do |tt|
 
-        # if there was previously a chain ..
-        if parent_id_was
+          child = tt[:source]
+          parent = tt[:from]
+          parent_id = "#{parent}_id"
 
-          # remove all the menus from the old chain.
-          self.send("#{child}=", self.send(child) - self.class.reflect_on_association(parent).class_name.constantize.find(parent_id_was).send(child))
+          # if the chain has changed ..
+          # if chain_id_changed?
+          if self.changes.has_key? parent_id
 
-        end
+            parent_id_was = self.changes[parent_id][0]
+            parent_id_is = self.changes[parent_id][1]
 
-        # if there is a new chain ..
-        if parent_id_is
+            # if there was previously a chain ..
+            if parent_id_was
 
-          # add all the menu items from the new chain to this restaurant.
-          self.send("#{child}=", self.send(child) + self.send(parent).send(child))
+              # remove all the menus from the old chain.
+              self.send("#{child}=", self.send(child) - self.class.reflect_on_association(parent).class_name.constantize.find(parent_id_was).send(child))
 
-        end
+            end
+
+            # if there is a new chain ..
+            if parent_id_is
+
+              # add all the menu items from the new chain to this restaurant.
+              self.send("#{child}=", self.send(child) + self.send(parent).send(child))
+
+            end
 
 
-        # if there was previously a chain ..
-        if parent_id_was
+            # if there was previously a chain ..
+            if parent_id_was
 
-          # remove all restaurants from the old chain.
-          # self.restaurants = self.restaurants - Chain.find(chain_id_was).restaurants
-          self.send("#{child}=", self.send(child) - self.class.reflect_on_association(parent).class_name.constantize.find(parent_id_was).send(child))
+              # remove all restaurants from the old chain.
+              # self.restaurants = self.restaurants - Chain.find(chain_id_was).restaurants
+              self.send("#{child}=", self.send(child) - self.class.reflect_on_association(parent).class_name.constantize.find(parent_id_was).send(child))
 
-        end
+            end
 
-        # if there is a new chain ..
-        if parent_id_is
+            # if there is a new chain ..
+            if parent_id_is
 
-          # add all the menu items from the new chain to this restaurant.
-          self.send("#{child}=", self.send(child) + self.send(parent).send(child))
+              # add all the menu items from the new chain to this restaurant.
+              self.send("#{child}=", self.send(child) + self.send(parent).send(child))
 
+            end
+
+          end
         end
 
       end
+
+      concrete_class = concrete_class.superclass
+
     end
+
   end
 
 end
