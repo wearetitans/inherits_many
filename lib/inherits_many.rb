@@ -1,25 +1,25 @@
-require "inherits_many/version"
+require "inherits_many_many/version"
 
 class ActiveRecord::Base
 
-  @@transfers_to = {}
-  def self.transfers_to(target, params)
-    unless @@transfers_to.has_key? self.name
-      @@transfers_to[self.name] = []
+  @@passes_on_to = {}
+  def self.passes_on_to(target, params)
+    unless @@passes_on_to.has_key? self.name
+      @@passes_on_to[self.name] = []
     end
-    @@transfers_to[self.name] << {target: target}.merge(params)
+    @@passes_on_to[self.name] << {target: target}.merge(params)
   end
 
-  after_save :process_transfers_to
-  def process_transfers_to
+  after_save :process_passes_on_to
+  def process_passes_on_to
 
     concrete_class = self.class
 
     while concrete_class.name != 'ActiveRecord::Base' do
 
-      unless @@transfers_to[concrete_class.name].nil?
+      unless @@passes_on_to[concrete_class.name].nil?
 
-        @@transfers_to[concrete_class.name].each do |tt|
+        @@passes_on_to[concrete_class.name].each do |tt|
 
           child = tt[:target]
           parent = tt[:of]
@@ -60,24 +60,24 @@ class ActiveRecord::Base
   end
 
 
-  @@inherits = {}
-  def self.inherits(source, params)
-    unless @@inherits.has_key? self.name
-      @@inherits[self.name] = []
+  @@inherits_many = {}
+  def self.inherits_many(source, params)
+    unless @@inherits_many.has_key? self.name
+      @@inherits_many[self.name] = []
     end
-    @@inherits[self.name] << {source: source}.merge(params)
+    @@inherits_many[self.name] << {source: source}.merge(params)
   end
 
-  after_save :process_inherits
-  def process_inherits
+  after_save :process_inherits_many
+  def process_inherits_many
 
     concrete_class = self.class
 
     while concrete_class.name != 'ActiveRecord::Base' do
 
-      unless @@inherits[concrete_class.name].nil?
+      unless @@inherits_many[concrete_class.name].nil?
 
-        @@inherits[concrete_class.name].each do |tt|
+        @@inherits_many[concrete_class.name].each do |tt|
 
           child = tt[:source]
           parent = tt[:from]
