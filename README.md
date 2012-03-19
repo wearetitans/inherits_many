@@ -1,5 +1,14 @@
-inherits_many
-=============
+# inherits_many
+
+## Summary
+Allow many-to-many relationships to inherit associated objects from a parent object's has_many association.
+
+## Installation
+Add the following to your `Gemfile`:
+
+  gem 'inherits_many'
+
+## Usage Example
 
 An individual restaurant can have many menu items, but a restaurant that belongs to a chain inherits all it's menu items from the chain it belongs to.
 

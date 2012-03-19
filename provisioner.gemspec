@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Andrew Culver"]
   s.email       = ["andrew.culver@gmail.com"]
   s.homepage    = "http://github.com/wearetitans/inherits_many"
-  s.summary     = %q{Allow has_many relationships to inherit associated objects from a parent object's has_many association.}
+  s.summary     = %q{Allow many-to-many relationships to inherit associated objects from a parent object's has_many association.}
   s.description = %q{Example: "If a restaurant can have many menu items and a chain has many menu items, ensure all restaurants have the menu items of the chain they belong to."}
 
   s.rubyforge_project = "inherits_many"
