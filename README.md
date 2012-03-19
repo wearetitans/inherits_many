@@ -1,7 +1,7 @@
 # inherits_many
 
 ## Summary
-Allow many-to-many relationships to inherit associated objects from a parent object's `has_many` association.
+Inherit the contents of an association from a parent object, but still be able to associate for yourself. Like a de-normalized `has_many, :through`, providing more flexibility. If that's not clear enough, just check out the usage example. :)
 
 ## Installation
 Add the following to your `Gemfile`:
