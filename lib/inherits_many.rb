@@ -1,4 +1,4 @@
-require "inherits_many_many/version"
+require "inherits_many/version"
 
 class ActiveRecord::Base
 
