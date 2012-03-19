@@ -3,24 +3,24 @@ require "inherits_many_many/version"
 module InheritsMany
   class ClassMethods
 
-    @@passes_on_many = {}
-    def self.passes_on_many(target, params)
-      unless @@passes_on_many.has_key? self.name
-        @@passes_on_many[self.name] = []
+    @@passes_on_to = {}
+    def self.passes_on_to(target, params)
+      unless @@passes_on_to.has_key? self.name
+        @@passes_on_to[self.name] = []
       end
-      @@passes_on_many[self.name] << {target: target}.merge(params)
+      @@passes_on_to[self.name] << {target: target}.merge(params)
     end
 
-    after_save :process_passes_on_many
-    def process_passes_on_many
+    after_save :process_passes_on_to
+    def process_passes_on_to
 
       concrete_class = self.class
 
       while concrete_class.name != 'ActiveRecord::Base' do
 
-        unless @@passes_on_many[concrete_class.name].nil?
+        unless @@passes_on_to[concrete_class.name].nil?
 
-          @@passes_on_many[concrete_class.name].each do |tt|
+          @@passes_on_to[concrete_class.name].each do |tt|
 
             child = tt[:target]
             parent = tt[:of]
